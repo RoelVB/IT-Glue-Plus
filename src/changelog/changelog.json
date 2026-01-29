@@ -1,0 +1,40 @@
+{
+    "$schema": "./schema.json",
+    "versions": [
+        {
+            "version": "current",
+            "changes": [
+                {
+                    "type": "fix",
+                    "description": "Logins would sometimes only show up after reloading the login page"
+                },
+                {
+                    "type": "fix",
+                    "description": "Setting to hide icon from username/password field didn't work"
+                }
+            ]
+        },
+        {
+            "version": "2.1.0",
+            "changes": [
+                {
+                    "type": "new",
+                    "description": "It's now possible to enter a username and/or password into any textfield using the contextmenu (right click)"
+                }
+            ]
+        },
+        {
+            "version": "2.0.0",
+            "changes": [
+                {
+                    "type": "new",
+                    "description": "Lots of improvements and rewritten code"
+                },
+                {
+                    "type": "improvement",
+                    "description": "Automated testing for more reliable and faster development"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,56 @@
+{
+    "name": "itglueplus",
+    "version": "0.1.0",
+    "author": "RoelVB",
+    "license": "GPL-3.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/RoelVB/IT-Glue-Plus.git"
+    },
+    "scripts": {
+        "dev": "webpack --mode \"development\"",
+        "build": "webpack --mode \"production\"",
+        "watch": "webpack --mode \"development\" -w",
+        "test": "mocha",
+        "test:all": "mocha --includeSites",
+        "test:webserver": "ts-node --transpile-only ./test/runWebserver.ts"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.10.5",
+        "@emotion/styled": "^11.10.5",
+        "@mui/icons-material": "^5.11.0",
+        "@mui/material": "^5.11.2",
+        "async-mutex": "^0.3.2",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "sjcl-all": "^1.0.1",
+        "uuid": "^9.0.0",
+        "zustand": "^5.0.1"
+    },
+    "devDependencies": {
+        "@types/chai": "^4.3.4",
+        "@types/chai-as-promised": "^7.1.5",
+        "@types/chrome": "^0.0.235",
+        "@types/mocha": "^10.0.1",
+        "@types/react-dom": "^18.0.10",
+        "@types/sjcl": "^1.0.29",
+        "@types/uuid": "^9.0.0",
+        "chai": "^4.3.7",
+        "chai-as-promised": "^7.1.1",
+        "dotenv": "^16.0.3",
+        "mocha": "^10.2.0",
+        "mock-keepasshttp": "github:RoelVB/Mock-KeePassHttp",
+        "puppeteer": "^19.8.0",
+        "ts-loader": "^9.4.2",
+        "ts-node": "^10.9.1",
+        "typescript": "4.9",
+        "webpack": "^5.15.0",
+        "webpack-cli": "^4.4.0"
+    },
+    "mocha": {
+        "spec": [
+            "test/test.ts"
+        ],
+        "require": "ts-node/register"
+    }
+}
