@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Client from '../classes/BackgroundClient';
 import Wrapper from './Wrapper';
 import { FooterContainer } from './Picker/Footer';
-import { useAssociation } from './Hooks/Association';
+import { useConnectionStatus } from './Hooks/Connection';
 
 export interface IProps
 {
@@ -21,7 +21,7 @@ const PopupContainer = styled(Box)(({ theme })=>({
 
 const Popup: React.FC<IProps> = (props)=>
 {
-    const [status] = useAssociation();
+    const [status] = useConnectionStatus();
 
     return (<Wrapper>
         <PopupContainer>
@@ -30,11 +30,9 @@ const Popup: React.FC<IProps> = (props)=>
                 <Typography component='div' variant='body1' sx={{fontWeight:'bold'}}>
                     {status === 'checking' ?
                         'Getting status...'
-                    : status === 'associating' ?
-                        'Connecting...'
-                    : status === 'associated' ?
+                    : status === 'connected' ?
                         'Connected'
-                    : 
+                    :
                         'Not connected'
                     }
                 </Typography>

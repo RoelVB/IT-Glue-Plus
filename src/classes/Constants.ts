@@ -3,8 +3,8 @@
  */
 import * as IMessage from '../IMessage';
 
-/** Extension name (without possible "bèta" suffix) ("EdgeKeePass" in Edge or "ChromeKeePass" in any other browser) */
-export const [ExtensionName] = EXTENSIONNAME.split(' ');
+/** Extension name (without possible "bèta" suffix) */
+export const ExtensionName = EXTENSIONNAME.replace(/ bèta$/i, '');
 
 /** We are currently running a bèta version of the extension */
 export const isBeta = EXTENSIONNAME.toLowerCase().includes('bèta');
@@ -43,14 +43,14 @@ export function log(type: 'debug'|'warn'|'error', msg: string, ...optionalParams
     switch(type)
     {
         case 'error':
-            console.error(`[CKP]: ${msg}`, ...optionalParams);
+            console.error(`[ITG-P]: ${msg}`, ...optionalParams);
             break;
         case 'warn':
-            console.warn(`[CKP]: ${msg}`, ...optionalParams);
+            console.warn(`[ITG-P]: ${msg}`, ...optionalParams);
             break;
         default:
             if(DEBUG)
-                console.log(`[CKP]: ${msg}`, ...optionalParams);
+                console.log(`[ITG-P]: ${msg}`, ...optionalParams);
             break;
     }
 }

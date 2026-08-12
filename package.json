@@ -25,7 +25,6 @@
         "jwt-decode": "^4.0.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "sjcl-all": "^1.0.1",
         "uuid": "^9.0.0",
         "zustand": "^5.0.1"
     },
@@ -36,7 +35,6 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@types/mocha": "^10.0.1",
         "@types/react-dom": "^18.0.10",
-        "@types/sjcl": "^1.0.29",
         "@types/uuid": "^9.0.0",
         "chai": "^4.3.7",
         "chai-as-promised": "^7.1.1",

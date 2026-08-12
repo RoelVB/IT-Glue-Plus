@@ -1,4 +1,5 @@
 import * as IMessage from '../IMessage';
+import { ExtensionName } from './Constants';
 
 export enum MenuItems
 {
@@ -24,38 +25,38 @@ export default class ContextMenu
     private _onInstall(details: chrome.runtime.InstalledDetails)
     {
         chrome.contextMenus.create({
-            id: 'ChromeKeePassRoot',
-            title: 'ChromeKeePass',
+            id: 'ITGluePlusRoot',
+            title: ExtensionName,
             contexts: ['all'],
         }, ()=>{
             chrome.contextMenus.create({
                 id: MenuItems.FILL_USER,
                 title: 'Fill user',
-                parentId: 'ChromeKeePassRoot',
+                parentId: 'ITGluePlusRoot',
                 contexts: ['all'],
             });
             chrome.contextMenus.create({
                 id: MenuItems.FILL_PASS,
                 title: 'Fill password',
-                parentId: 'ChromeKeePassRoot',
+                parentId: 'ITGluePlusRoot',
                 contexts: ['all'],
             });
             chrome.contextMenus.create({
                 id: MenuItems.FILL_USER_PASS,
                 title: 'Fill user + password',
-                parentId: 'ChromeKeePassRoot',
+                parentId: 'ITGluePlusRoot',
                 contexts: ['all'],
             });
             chrome.contextMenus.create({
                 id: 'fill_separator',
-                parentId:'ChromeKeePassRoot',
+                parentId:'ITGluePlusRoot',
                 type: 'separator',
                 contexts: ['all'],
             });
             chrome.contextMenus.create({
                 id: MenuItems.REDETECT_FIELDS,
                 title: 'Re-detect fields',
-                parentId: 'ChromeKeePassRoot',
+                parentId: 'ITGluePlusRoot',
                 contexts: ['all'],
             });
         });

@@ -2,20 +2,42 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
-import { useAssociation } from '../Hooks/Association';
+import { useConnectionStatus } from '../Hooks/Connection';
 import { PaperGrid } from './Options';
 import { defaultSettings } from '../../Settings';
+import { getBaseUrl, servers } from '../../itglue/servers';
 import Button from '@mui/material/Button';
 import { log } from '../../classes/Constants';
 import CircularProgress from '@mui/material/CircularProgress';
 import useSettings from '../Hooks/Settings';
 
-const AssociationStatus: React.FC = ()=>
+const regionOptions: Array<{value: keyof typeof servers['production'], label: string}> = [
+    {value: 'na', label: 'North America (na)'},
+    {value: 'eu', label: 'Europe (eu)'},
+    {value: 'au', label: 'Australia (au)'},
+];
+
+const environmentOptions: Array<{value: keyof typeof servers, label: string}> = [
+    {value: 'production', label: 'Production'},
+    {value: 'qa', label: 'QA'},
+    {value: 'test', label: 'Test'},
+    {value: 'local', label: 'Local'},
+];
+
+const ConnectionStatusDisplay: React.FC = ()=>
 {
     const settings = useSettings(state=>state.settings);
-    const [status, associationId, associationError, associate] = useAssociation([settings?.keePassHost, settings?.keePassPort]);
+    const subdomain = settings?.itGlueSubdomain || defaultSettings.itGlueSubdomain;
+    const region = settings?.itGlueRegion || defaultSettings.itGlueRegion;
+    const environment = settings?.itGlueEnvironment || defaultSettings.itGlueEnvironment;
+    const [status, connectedSubdomain, connectionError, recheck] = useConnectionStatus([subdomain, region, environment]);
+
+    const openLogin = React.useCallback(()=>{
+        if(subdomain) chrome.tabs.create({url: getBaseUrl(subdomain, region, environment)});
+    }, [subdomain, region, environment]);
 
     if(status === 'checking')
     {
@@ -24,88 +46,117 @@ const AssociationStatus: React.FC = ()=>
             <CircularProgress sx={{ml: 1}} size={20} />
         </>);
     }
-    else if(status === 'associating')
-    {
-        return (<>
-            Connecting... accept the connection in KeePass
-            <CircularProgress sx={{ml: 1}} size={20} />
-        </>);
-    }
-    else if(status === 'associated')
-        return <>Connected as '{associationId}'</>;
-    else if(associationError)
-        return <Alert severity='error'>{associationError}</Alert>;
+    else if(status === 'connected')
+        return <>Connected to '{connectedSubdomain}'</>;
     else
     {
-        return (<>
-            Not connected
-            <Button
-                id='connectBtn'
-                variant='contained'
-                size='small'
-                sx={{ml: 1}}
-                onClick={associate}
-            >
-                Connect
-            </Button>
-        </>);
+        return (<Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
+            {connectionError ?
+                <Alert severity='error'>{connectionError}</Alert>
+            :
+                <>Not connected</>
+            }
+            <Box>
+                <Button
+                    id='openLoginBtn'
+                    variant='contained'
+                    size='small'
+                    disabled={!subdomain}
+                    onClick={openLogin}
+                >
+                    Open IT Glue login
+                </Button>
+                <Button
+                    id='retryBtn'
+                    size='small'
+                    sx={{ml: 1}}
+                    onClick={recheck}
+                >
+                    Retry
+                </Button>
+            </Box>
+        </Box>);
     }
 };
 
 const Connection: React.FC = ()=>
 {
-    const [ inputHost, setInputHost ] = React.useState<string>();
-    const [ inputPort, setInputPort ] = React.useState<number>();
+    const [ inputSubdomain, setInputSubdomain ] = React.useState<string>();
+    const [ inputRegion, setInputRegion ] = React.useState<keyof typeof servers['production']>();
+    const [ inputEnvironment, setInputEnvironment ] = React.useState<keyof typeof servers>();
     const settings = useSettings(state=>state.settings);
     const isSaving = useSettings(state=>state.isSaving);
     const saveSettings = useSettings(state=>state.saveSettings);
 
-    /** Host or port changed? */
+    /** Subdomain, region or environment changed? */
     const canApply = React.useMemo(()=>{
         return (
-            (inputHost && inputHost !== settings?.keePassHost) // Host changed
-            || (inputPort && inputPort !== settings?.keePassPort) // Port changed
+            (inputSubdomain !== undefined && inputSubdomain !== settings?.itGlueSubdomain) // Subdomain changed
+            || (inputRegion !== undefined && inputRegion !== settings?.itGlueRegion) // Region changed
+            || (inputEnvironment !== undefined && inputEnvironment !== settings?.itGlueEnvironment) // Environment changed
         );
-    }, [inputHost, inputPort, settings?.keePassHost, settings?.keePassPort]);
+    }, [inputSubdomain, inputRegion, inputEnvironment, settings?.itGlueSubdomain, settings?.itGlueRegion, settings?.itGlueEnvironment]);
 
-    /** Save host and port */
+    /** Save subdomain, region and environment */
     const onApply = React.useCallback(()=>{
-        log('debug', `Apply KeePassHttp settings (${inputHost || defaultSettings.keePassHost}:${inputPort || defaultSettings.keePassPort})`);
+        const subdomain = inputSubdomain ?? (settings?.itGlueSubdomain || defaultSettings.itGlueSubdomain);
+        const region = inputRegion ?? (settings?.itGlueRegion || defaultSettings.itGlueRegion);
+        const environment = inputEnvironment ?? (settings?.itGlueEnvironment || defaultSettings.itGlueEnvironment);
+
+        log('debug', `Apply IT Glue settings (${environment}/${region}/${subdomain})`);
         saveSettings({
-            keePassHost: inputHost || defaultSettings.keePassHost,
-            keePassPort: inputPort || defaultSettings.keePassPort,
+            itGlueSubdomain: subdomain,
+            itGlueRegion: region,
+            itGlueEnvironment: environment,
         });
-    }, [inputHost, inputPort]);
+    }, [inputSubdomain, inputRegion, inputEnvironment]);
 
     return (<Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
         <Typography>Status</Typography>
         <PaperGrid gridProps={{alignItems: 'center'}}>
-            <AssociationStatus />
+            <ConnectionStatusDisplay />
         </PaperGrid>
 
-        <Typography>KeePassHttp settings</Typography>
+        <Typography>IT Glue settings</Typography>
         <PaperGrid gridProps={{flexDirection: 'column', gap: 1}}>
-            <Grid item container alignItems='center'>
+            <Grid item container alignItems='center' gap={1}>
                 <TextField
-                    id='hostnameField'
+                    id='subdomainField'
                     sx={{width: '250px'}}
                     variant='filled'
                     size='small'
-                    label='Hostname / IP address'
-                    value={inputHost ?? (settings?.keePassHost || defaultSettings.keePassHost)}
-                    onChange={ev=>setInputHost(ev.target.value)}
+                    label='Subdomain'
+                    value={inputSubdomain ?? (settings?.itGlueSubdomain ?? defaultSettings.itGlueSubdomain)}
+                    onChange={ev=>setInputSubdomain(ev.target.value)}
                 />
-                <Typography>:</Typography>
                 <TextField
-                    id='portField'
-                    sx={{width: '120px'}}
-                    type='number'
+                    id='regionField'
+                    select
+                    sx={{width: '160px'}}
                     variant='filled'
                     size='small'
-                    label='Port'
-                    value={inputPort ?? (settings?.keePassPort || defaultSettings.keePassPort)}
-                    onChange={ev=>setInputPort(Number(ev.target.value))}
-                />
+                    label='Region'
+                    value={inputRegion ?? (settings?.itGlueRegion || defaultSettings.itGlueRegion)}
+                    onChange={ev=>setInputRegion(ev.target.value as keyof typeof servers['production'])}
+                >
+                    {regionOptions.map(option=>(
+                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                    ))}
+                </TextField>
+                <TextField
+                    id='environmentField'
+                    select
+                    sx={{width: '160px'}}
+                    variant='filled'
+                    size='small'
+                    label='Environment'
+                    value={inputEnvironment ?? (settings?.itGlueEnvironment || defaultSettings.itGlueEnvironment)}
+                    onChange={ev=>setInputEnvironment(ev.target.value as keyof typeof servers)}
+                >
+                    {environmentOptions.map(option=>(
+                        <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                    ))}
+                </TextField>
             </Grid>
             <Grid item>
                 <Button

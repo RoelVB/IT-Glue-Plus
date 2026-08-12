@@ -46,7 +46,8 @@ const Changelog: React.FC<IProps> = (props)=>
             description={`Automtically open this changelog after ${ExtensionName} got updated`}
         />
 
-        {!isBeta && hideTryBetaMsg === false ?(
+        {/* TODO: Are we going to have a bèta release? */}
+        {/* {!isBeta && hideTryBetaMsg === false ?(
             <Alert
                 severity='info'
                 icon={<ScienceIcon />}
@@ -55,7 +56,7 @@ const Changelog: React.FC<IProps> = (props)=>
                 <AlertTitle><strong>Try {ExtensionName} Bèta?</strong></AlertTitle>
                 If you want to be the first to try the latest {ExtensionName} features, you could install the bèta version from <Link href={/^edge/i.test(ExtensionName)?'https://microsoftedge.microsoft.com/addons/detail/niekjejailhcgickepdfkhlblegbgecd':'https://chromewebstore.google.com/detail/ameocahhjkljlabpiajepcipkbcpjpep'} target='_blank'>the store</Link>.
             </Alert>
-        ): null}
+        ): null} */}
 
         {props.showUpdate ?(
             <Alert severity='success'>{ExtensionName} just updated from <strong>{props.showUpdate}</strong> to <strong>{VERSION}</strong></Alert>

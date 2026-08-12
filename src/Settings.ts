@@ -1,3 +1,4 @@
+import type { servers } from './itglue/servers';
 
 export interface ITheme {
     /** Show a footer in the credential dropdown list? */
@@ -6,7 +7,7 @@ export interface ITheme {
 
 export interface ISettings
 {
-    /** Show the ChromeKeePass icon in the username field? */
+    /** Show the extension's icon in the username field? */
     showUsernameIcon: boolean;
     /** Show the dropdown when username field gets focus */
     showDropdownOnFocus: boolean;
@@ -18,21 +19,23 @@ export interface ISettings
     autoFillSingleCredential: boolean;
     /** Show suggestions while typing in the username field */
     autoComplete: boolean;
-    /** The host for KeePassHttp */
-    keePassHost: string;
-    /** The port for KeePassHttp */
-    keePassPort: number;
+    /** The IT Glue environment to connect to */
+    itGlueEnvironment: keyof typeof servers;
+    /** The IT Glue region to connect to */
+    itGlueRegion: keyof typeof servers['production'];
+    /** The IT Glue account subdomain to connect to */
+    itGlueSubdomain: string;
     /** Listen for changes in the html document and search for new input fields */
     searchForInputsOnUpdate: boolean;
     /** Settings determining the look of user interface elements */
     theme: ITheme;
-    /** Should we show the changelog when CKP got updated? */
+    /** Should we show the changelog when the extension got updated? */
     showChangelogAfterUpdate: boolean;
     /** Hide the "Try ChromeKeePass Bèta" message above the changelog */
     hideTryBetaMsg: boolean;
 }
 
-export const defaultSettings: ISettings = 
+export const defaultSettings: ISettings =
 {
     showUsernameIcon: true,
     showDropdownOnFocus: true,
@@ -40,8 +43,9 @@ export const defaultSettings: ISettings =
     showDropdownOnClick: false,
     autoFillSingleCredential: true,
     autoComplete: true,
-    keePassHost: 'localhost',
-    keePassPort: 19455,
+    itGlueEnvironment: 'production',
+    itGlueRegion: 'eu',
+    itGlueSubdomain: '',
     searchForInputsOnUpdate: true,
     theme: {
         enableDropdownFooter: true,

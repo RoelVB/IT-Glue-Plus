@@ -5,10 +5,8 @@ export enum RequestType
     findCredentials,
     /** Open the extension's options */
     openOptions,
-    /** Check KeePassHttp association */
-    testAssociate,
-    /** Associate with KeePassHttp */
-    associate,
+    /** Check the connection with IT Glue */
+    checkConnection,
     /** Re-detect the credentials fields */
     redetectFields,
     /** Get extension commands */
@@ -27,7 +25,7 @@ export interface Request
     type: RequestType;
 }
 
-export type Response = Credential[] | Association | chrome.commands.Command[];
+export type Response = Credential[] | ConnectionStatus | chrome.commands.Command[];
 
 export interface Credential
 {
@@ -36,10 +34,10 @@ export interface Credential
     password: string;
 }
 
-export interface Association
+export interface ConnectionStatus
 {
-    Id: string;
-    Associated: boolean;
+    Connected: boolean;
+    Subdomain?: string;
     Error?: string;
 }
 

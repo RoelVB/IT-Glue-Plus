@@ -7,31 +7,14 @@ export default class BackgroundClient
 {
     
     /**
-     * Associate with KeePassHttp
+     * Check the connection with IT Glue
      */
-    public static associate(): Promise<IMessage.Association>
+    public static checkConnection(): Promise<IMessage.ConnectionStatus>
     {
-        return new Promise<IMessage.Association>((resolve, reject)=>{
+        return new Promise<IMessage.ConnectionStatus>((resolve, reject)=>{
             chrome.runtime.sendMessage({
-                type: IMessage.RequestType.associate,
-            } as IMessage.Request, (response: IMessage.Association)=>{
-                if(response.Error) // We got an error?
-                    reject(response.Error);
-                else // No error
-                    resolve(response);
-            });
-        });
-    }
-
-    /**
-     * Test the association with KeePassHttp
-     */
-    public static testAssociate(): Promise<IMessage.Association>
-    {
-        return new Promise<IMessage.Association>((resolve, reject)=>{
-            chrome.runtime.sendMessage({
-                type: IMessage.RequestType.testAssociate,
-            } as IMessage.Request, (response: IMessage.Association)=>{
+                type: IMessage.RequestType.checkConnection,
+            } as IMessage.Request, (response: IMessage.ConnectionStatus)=>{
                 if(response.Error) // We got an error?
                     reject(response.Error);
                 else // No error

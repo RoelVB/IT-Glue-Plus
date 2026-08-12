@@ -25,9 +25,17 @@ export class ITGlueClient
 
     async fetchPassword(id: number, includePassword?: boolean): Promise<IGluePassword>
     {
-        return this.#request({
+        const res = await this.#request({
             url: this.getEndpointUrl('password').replace('{id}', String(id)).replace('{includePassword}', String(Boolean(includePassword))),
         });
+
+        return res.data;
+    }
+
+    /** Verify we can authenticate with IT Glue. Throws if the browser isn't logged in to IT Glue. */
+    async checkConnection(): Promise<void>
+    {
+        await this.#ensureToken();
     }
 
     async search(query: IGlueSearchQuery): Promise<IGlueSearch[]>
@@ -67,17 +75,17 @@ export class ITGlueClient
         if(this._token && this._token.expiration.getTime() > Date.now())
             return this._token;
 
-        // Fetch refresh token
+        // Fetch refresh token (relies on the browser's IT Glue session cookie)
         let refreshToken: string;
         try {
             const res = await axios<any, AxiosResponse<IGlueRefresh>>({
                 url: `${this.baseUrl}/jwt/refresh`,
+                withCredentials: true,
             });
 
             refreshToken = res.data.token;
         } catch(error) {
-            // TODO: Beter error handling
-            throw error;
+            throw new Error(`Unable to reach IT Glue at ${this.baseUrl}. Make sure you're logged in to IT Glue in this browser.`);
         }
 
         // Fetch new token
@@ -85,6 +93,7 @@ export class ITGlueClient
             const res = await axios<any, AxiosResponse<IGlueRefresh>>({
                 method: 'POST',
                 url: `${this.baseUrl}/jwt/token`,
+                withCredentials: true,
                 headers: {
                     'X-Refresh-Token': refreshToken,
                 },
@@ -98,8 +107,7 @@ export class ITGlueClient
                 expiration: new Date(parsedToken.exp*1000),
             };
         } catch(error) {
-            // TODO: Beter error handling
-            throw error;
+            throw new Error(`Failed to authenticate with IT Glue. Make sure you're logged in at ${this.baseUrl}.`);
         }
 
         return this._token;

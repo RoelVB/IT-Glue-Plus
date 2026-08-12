@@ -1,4 +1,4 @@
-import KeePassHTTP from './KeePassHTTP';
+import ITGlueService from './ITGlueService';
 import * as IMessage from '../IMessage';
 import { ISettings, defaultSettings } from '../Settings';
 import { log } from './Constants';
@@ -53,7 +53,7 @@ export default class BasicAuth
         log('debug', `Trying basic auth for ${request.url}`);
 
         try {
-            this._credentials = await KeePassHTTP.getLogins(request.url);
+            this._credentials = await ITGlueService.getLogins(request.url);
             if(this._credentials.length) // Found some credentials?
             {
                 if(this._settings.autoFillSingleCredential && this._credentials.length === 1) // Auto-fill single credential?

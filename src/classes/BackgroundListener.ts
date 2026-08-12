@@ -1,6 +1,6 @@
 import * as IMessage from '../IMessage';
 import { log } from './Constants';
-import KeePassHTTP from './KeePassHTTP';
+import ITGlueService from './ITGlueService';
 
 export default class BackgroundListener
 {
@@ -10,24 +10,21 @@ export default class BackgroundListener
         chrome.runtime.onMessage.addListener(this._onMessage.bind(this));
 
         // noinspection JSIgnoredPromiseFromCall
-        this._testAssociate();
+        this._checkConnection();
     }
 
     /** When a message is received */
     private _onMessage(message: IMessage.Request, sender: chrome.runtime.MessageSender, sendResponse: (response: IMessage.Response)=>void)
     {
         let responsePromise: Promise<IMessage.Response> | undefined;
-        
+
         switch(message.type)
         {
             case IMessage.RequestType.openOptions:
                 chrome.runtime.openOptionsPage();
                 break;
-            case IMessage.RequestType.testAssociate:
-                responsePromise = this._testAssociate();
-                break;
-            case IMessage.RequestType.associate:
-                responsePromise = this._associate();
+            case IMessage.RequestType.checkConnection:
+                responsePromise = this._checkConnection();
                 break;
             case IMessage.RequestType.findCredentials:
                 responsePromise = this._findCredentials(sender.url || '');
@@ -56,7 +53,7 @@ export default class BackgroundListener
             log('debug', 'Get credentials for ', url);
             if(url)
             {
-                KeePassHTTP.getLogins(url).then((result)=>{
+                ITGlueService.getLogins(url).then((result)=>{
                     BackgroundListener._setErrorIcon(true);
                     resolve(result);
                 }).catch((error)=>{
@@ -69,47 +66,16 @@ export default class BackgroundListener
         });
     }
 
-    /** Associate with KeePassHttp */
-    private _associate(): Promise<IMessage.Association>
+    /** Check the connection with IT Glue */
+    private _checkConnection(): Promise<IMessage.ConnectionStatus>
     {
-        return new Promise<IMessage.Association>((resolve)=>{
-            KeePassHTTP.associate().then((associated)=>{
-                BackgroundListener._setErrorIcon(true);
+        return new Promise<IMessage.ConnectionStatus>((resolve)=>{
+            ITGlueService.testConnection().then(({connected, error})=>{
+                BackgroundListener._setErrorIcon(connected);
                 resolve({
-                    Id: KeePassHTTP.id,
-                    Associated: associated,
-                });
-
-            }).catch((error)=>{
-                console.error(error);
-                BackgroundListener._setErrorIcon();
-                resolve({
-                    Id: KeePassHTTP.id,
-                    Associated: false,
-                    Error: 'Something went wrong... did you accept the connection within KeePass?',
-                });
-            });
-        });
-    }
-
-    /** Test the association with KeePassHttp */
-    private _testAssociate(): Promise<IMessage.Association>
-    {
-        return new Promise<IMessage.Association>((resolve)=>{
-            KeePassHTTP.testAssociate().then((associated)=>{
-                BackgroundListener._setErrorIcon(associated);
-                resolve({
-                    Id: KeePassHTTP.id,
-                    Associated: associated,
-                });
-
-            }).catch((error)=>{
-                console.error(error);
-                BackgroundListener._setErrorIcon();
-                resolve({
-                    Id: KeePassHTTP.id,
-                    Associated: false,
-                    Error: 'Something went wrong... is KeePass running and is the KeePassHttp plugin installed?',
+                    Connected: connected,
+                    Subdomain: ITGlueService.subdomain,
+                    Error: error,
                 });
             });
         });
