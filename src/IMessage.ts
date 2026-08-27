@@ -7,11 +7,13 @@ export enum RequestType
     openOptions,
     /** Check the connection with IT Glue */
     checkConnection,
+    /** Fetch the real password for a credential, by id */
+    fetchPassword,
     /** Re-detect the credentials fields */
     redetectFields,
     /** Get extension commands */
     getCommands,
-
+    
     /** Send to a tab when the "Fill user + password" was selected in the contextmenu */
     contextMenuFillUserPass,
     /** Send to a tab when the "Fill user" was selected in the contextmenu */
@@ -20,18 +22,27 @@ export enum RequestType
     contextMenuFillPass,
 }
 
-export interface Request
+export interface RequestData extends Record<RequestType, unknown>
 {
-    type: RequestType;
+    [RequestType.fetchPassword]: {
+        id: number;
+    };
 }
 
-export type Response = Credential[] | ConnectionStatus | chrome.commands.Command[];
+export type Request = {
+  [K in RequestType]: {
+    type: K,
+  } & RequestData[K];
+}[RequestType];
+
+export type Response = Credential[] | ConnectionStatus | PasswordResult | chrome.commands.Command[];
 
 export interface Credential
 {
+    id: number;
     title: string;
     username: string;
-    password: string;
+    organization: string;
 }
 
 export interface ConnectionStatus
@@ -39,6 +50,11 @@ export interface ConnectionStatus
     Connected: boolean;
     Subdomain?: string;
     Error?: string;
+}
+
+export interface PasswordResult
+{
+    password: string;
 }
 
 export interface BasicAuth

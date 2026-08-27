@@ -2,6 +2,7 @@
  * This file contains some globally used variables
  */
 import * as IMessage from '../IMessage';
+import Client from './BackgroundClient';
 
 /** Extension name (without possible "bèta" suffix) */
 export const ExtensionName = EXTENSIONNAME.replace(/ bèta$/i, '');
@@ -62,7 +63,7 @@ export function elementIsEnabledInput(element: HTMLElement)
         return element as HTMLInputElement;
 }
 
-export function enterCredential(credential: IMessage.Credential, usernameField?: HTMLInputElement, passwordField?: HTMLInputElement)
+export async function enterCredential(credential: IMessage.Credential, usernameField?: HTMLInputElement, passwordField?: HTMLInputElement)
 {
     if(usernameField)
     {
@@ -73,8 +74,11 @@ export function enterCredential(credential: IMessage.Credential, usernameField?:
     }
     if(passwordField)
     {
-        passwordField.value = credential.password;
-        passwordField.defaultValue = credential.password;
+        // The password isn't part of `credential` (it's never sent over until it's actually needed), so fetch it now
+        const password = await Client.fetchPassword(credential.id);
+
+        passwordField.value = password;
+        passwordField.defaultValue = password;
         passwordField.dispatchEvent(new Event('input', {bubbles: true}));
         passwordField.dispatchEvent(new Event('change', {bubbles: true}));
     }

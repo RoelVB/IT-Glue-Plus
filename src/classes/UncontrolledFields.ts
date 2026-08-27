@@ -111,8 +111,8 @@ export default class UncontrolledFields
             usernameField,
             passwordField,
             onClose: ()=>closePicker(),
-            onSelect: (cred, user, pass)=>{
-                enterCredential(cred, user, pass);
+            onSelect: async (cred, user, pass)=>{
+                await enterCredential(cred, user, pass);
                 closePicker();
             },
         });

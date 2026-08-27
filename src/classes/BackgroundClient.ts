@@ -22,6 +22,19 @@ export default class BackgroundClient
     }
 
     /**
+     * Fetch the real password for a credential, by id
+     */
+    public static async fetchPassword(id: number): Promise<string>
+    {
+        const res = await this.#sendMessage<IMessage.PasswordResult>({
+            type: IMessage.RequestType.fetchPassword,
+            id,
+        });
+
+        return res.password;
+    }
+
+    /**
      * Find credentials for current url
      */
     public static findCredentials(): Promise<IMessage.Credential[]>

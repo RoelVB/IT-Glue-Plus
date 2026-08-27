@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import { getBaseUrl, getEndpointUrl, servers } from "./servers";
 import { IGluePassword, IGlueRefresh } from './types/base';
-import { IGlueSearch, IGlueSearchQuery } from './types/search';
+import { IGlueSearch, IGlueSearchOrganization, IGlueSearchPassword, IGlueSearchQuery } from './types/search';
 
 export class ITGlueClient
 {
@@ -38,6 +38,9 @@ export class ITGlueClient
         await this.#ensureToken();
     }
 
+    async search(query: IGlueSearchQuery & {kind: ['passwords']}): Promise<IGlueSearchPassword[]>;
+    async search(query: IGlueSearchQuery & {kind: ['organizations']}): Promise<IGlueSearchOrganization[]>;
+    async search(query: IGlueSearchQuery): Promise<IGlueSearch[]>;
     async search(query: IGlueSearchQuery): Promise<IGlueSearch[]>
     {
         const queryParts: string[] = [];

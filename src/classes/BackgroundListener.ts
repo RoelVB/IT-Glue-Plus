@@ -26,6 +26,9 @@ export default class BackgroundListener
             case IMessage.RequestType.checkConnection:
                 responsePromise = this._checkConnection();
                 break;
+            case IMessage.RequestType.fetchPassword:
+                responsePromise = this._fetchPassword(message.id);
+                break;
             case IMessage.RequestType.findCredentials:
                 responsePromise = this._findCredentials(sender.url || '');
                 break;
@@ -79,6 +82,12 @@ export default class BackgroundListener
                 });
             });
         });
+    }
+
+    /** Fetch the real password for a credential, by id */
+    private _fetchPassword(id: number): Promise<IMessage.PasswordResult>
+    {
+        return ITGlueService.fetchPassword(id).then((password)=>({password}));
     }
 
     private _getExtensionCommands(): Promise<chrome.commands.Command[]>

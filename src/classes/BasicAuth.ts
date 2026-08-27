@@ -58,7 +58,8 @@ export default class BasicAuth
             {
                 if(this._settings.autoFillSingleCredential && this._credentials.length === 1) // Auto-fill single credential?
                 {
-                    return {authCredentials: {username: this._credentials[0].username, password: this._credentials[0].password}};
+                    const password = await ITGlueService.fetchPassword(this._credentials[0].id);
+                    return {authCredentials: {username: this._credentials[0].username, password}};
                 }
                 else // Show options
                 {
@@ -86,7 +87,8 @@ export default class BasicAuth
                         if(selectedCredential !== undefined) // Credentials selected?
                         {
                             log('debug', `Send credentials for "${selectedCredential.username}" to "${request.url}"`);
-                            return {authCredentials: {username: selectedCredential.username, password: selectedCredential.password}};
+                            const password = await ITGlueService.fetchPassword(selectedCredential.id);
+                            return {authCredentials: {username: selectedCredential.username, password}};
                         }
                         else
                             log('debug', `No credentials where selected for ${request.url}`);

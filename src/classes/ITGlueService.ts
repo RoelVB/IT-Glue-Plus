@@ -61,34 +61,36 @@ export class ITGlueService
 
         const searchResults = await client.search({query: `host:${pageHostname}`, kind: ['passwords'], limit: 25, include_personal_password: true});
 
-        // TODO: Fetch passwords at use, not beforehand
-        const passwords = await Promise.all(
-            searchResults.map(searchResult=>client.fetchPassword(Number(searchResult.id), true).catch((error)=>{
-                log('warn', `Failed to fetch IT Glue password ${searchResult.id}`, error);
-                return undefined;
-            }))
-        );
 
         const credentials: IMessage.Credential[] = [];
-        for(const password of passwords)
+        for(const result of searchResults)
         {
-            if(!password?.attributes.password) continue; // We didn't get a usable password back
-
-            const credentialHostname = hostnameOf(password.attributes.url) || hostnameOf(password.attributes['resource-url']);
-            if(credentialHostname && hostnamesMatch(pageHostname, credentialHostname))
-            {
-                credentials.push({
-                    title: password.attributes.name,
-                    username: password.attributes.username,
-                    password: password.attributes.password,
-                    // TODO: Include organization to show in dropdown
-                });
-            }
+            credentials.push({
+                id: result.id,
+                title: result.name,
+                username: result.username,
+                organization: result.organization_name,
+            });
         }
 
         log('debug', `Got ${credentials.length} logins for "${pageHostname}"`);
 
         return credentials;
+    }
+
+    /**
+     * Fetch the real password for a credential. Kept separate from `getLogins` so we only ever
+     * retrieve a password's actual value right before it's needed (e.g. when it's entered into a field).
+     */
+    public async fetchPassword(id: number): Promise<string>
+    {
+        const client = await this._getClient();
+        const password = await client.fetchPassword(id, true);
+
+        if(!password.attributes.password)
+            throw new Error('IT Glue did not return a password for this entry');
+        else
+            return password.attributes.password;
     }
 
     /**

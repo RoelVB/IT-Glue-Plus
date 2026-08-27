@@ -106,9 +106,9 @@ export default class FieldSet
     }
 
     /** Enter the credentials into the fields */
-    public enterCredentials(cred: IMessage.Credential)
+    public async enterCredentials(cred: IMessage.Credential)
     {
-        this._inputCredential(cred);
+        await this._inputCredential(cred);
         this._pageControl.dropdown.close();
     }
 
@@ -287,8 +287,8 @@ export default class FieldSet
     }
 
     /** Input a credential into the fields */
-    private _inputCredential(credential: IMessage.Credential)
+    private async _inputCredential(credential: IMessage.Credential)
     {
-        enterCredential(credential, this.usernameField, this.passwordField);
+        await enterCredential(credential, this.usernameField, this.passwordField);
     }
 }
