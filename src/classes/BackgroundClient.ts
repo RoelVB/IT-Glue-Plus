@@ -9,18 +9,16 @@ export default class BackgroundClient
     /**
      * Check the connection with IT Glue
      */
-    public static checkConnection(): Promise<IMessage.ConnectionStatus>
+    public static async checkConnection(): Promise<IMessage.ConnectionStatus>
     {
-        return new Promise<IMessage.ConnectionStatus>((resolve, reject)=>{
-            chrome.runtime.sendMessage({
-                type: IMessage.RequestType.checkConnection,
-            } as IMessage.Request, (response: IMessage.ConnectionStatus)=>{
-                if(response.Error) // We got an error?
-                    reject(response.Error);
-                else // No error
-                    resolve(response);
-            });
+        const res = await this.#sendMessage<IMessage.ConnectionStatus>({
+            type: IMessage.RequestType.checkConnection,
         });
+
+        if(res.Error)
+            throw res.Error;
+        else
+            return res;
     }
 
     /**
@@ -28,23 +26,19 @@ export default class BackgroundClient
      */
     public static findCredentials(): Promise<IMessage.Credential[]>
     {
-        return new Promise<IMessage.Credential[]>((resolve)=>{
-            chrome.runtime.sendMessage({
-                type: IMessage.RequestType.findCredentials,
-            } as IMessage.Request, (response)=>{
-                resolve(response);
-            });
+        return this.#sendMessage({
+            type: IMessage.RequestType.findCredentials,
         });
     }
 
     /**
      * Open the extensions' options
      */
-    public static openOptions(): void
+    public static openOptions()
     {
-        chrome.runtime.sendMessage({
+        return this.#sendMessage({
             type: IMessage.RequestType.openOptions,
-        } as IMessage.Request);
+        });
     }
 
     /**
@@ -52,13 +46,14 @@ export default class BackgroundClient
      */
     public static getExtensionCommands(): Promise<chrome.commands.Command[]>
     {
-        return new Promise<chrome.commands.Command[]>((resolve)=>{
-            chrome.runtime.sendMessage({
-                type: IMessage.RequestType.getCommands,
-            } as IMessage.Request, (response)=>{
-                resolve(response);
-            });
+        return this.#sendMessage<chrome.commands.Command[]>({
+            type: IMessage.RequestType.getCommands,
         });
+    }
+
+    static #sendMessage<R = IMessage.Response, M = IMessage.Request>(msg: M): Promise<R>
+    {
+        return chrome.runtime.sendMessage<M, R>(msg);
     }
 
 }
